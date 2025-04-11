@@ -1,0 +1,240 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "API de Controle Financeiro",
+    "version": "1.0.0",
+    "description": "MVP para gerenciamento de carteiras, gastos e lembretes"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Servidor local"
+    }
+  ],
+  "paths": {
+    "/auth/login": {
+      "post": {
+        "summary": "Login do usuário",
+        "tags": ["Autenticação"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string" },
+                  "password": { "type": "string" }
+                },
+                "required": ["email", "password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login realizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/me": {
+      "get": {
+        "summary": "Retorna dados do usuário autenticado",
+        "tags": ["Usuário"],
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Dados do usuário",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/User" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/wallets": {
+      "get": {
+        "summary": "Lista todas as carteiras do usuário",
+        "tags": ["Carteiras"],
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Carteiras listadas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Wallet" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Cria uma carteira",
+        "tags": ["Carteiras"],
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "initialBalance": { "type": "number" },
+                  "currencyId": { "type": "integer" }
+                },
+                "required": ["name", "initialBalance", "currencyId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Carteira criada",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Wallet" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/wallets/{id}": {
+      "get": {
+        "summary": "Busca carteira por ID",
+        "tags": ["Carteiras"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Carteira encontrada",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Wallet" }
+              }
+            }
+          },
+          "404": {
+            "description": "Carteira não encontrada"
+          }
+        }
+      },
+      "put": {
+        "summary": "Atualiza carteira",
+        "tags": ["Carteiras"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "currencyId": { "type": "integer" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Carteira atualizada"
+          },
+          "404": {
+            "description": "Carteira não encontrada"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Remove carteira",
+        "tags": ["Carteiras"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Carteira removida"
+          },
+          "404": {
+            "description": "Carteira não encontrada"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Wallet": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "name": { "type": "string" },
+          "initialBalance": { "type": "number" },
+          "currencyId": { "type": "integer" },
+          "userId": { "type": "integer" },
+          "currency": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "integer" },
+              "code": { "type": "string" },
+              "name": { "type": "string" }
+            }
+          }
+        }
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "email": { "type": "string" }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}
