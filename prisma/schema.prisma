@@ -48,6 +48,7 @@ model Transaction {
   description String?
   date        DateTime
   isRecurring Boolean  @default(false)
+  recurrenceInterval String? // "daily" | "weekly" | "monthly" | "yearly"
 
   wallet   Wallet          @relation(fields: [walletId], references: [id])
   type     TransactionType @relation(fields: [typeId], references: [id])

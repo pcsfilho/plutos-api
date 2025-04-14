@@ -10,7 +10,6 @@ import { authenticateToken } from "../middlewares/auth.middleware";
 
 const router = express.Router();
 
-router.use(authenticateToken);
 router.post("/reminders", createReminder);
 router.get("/reminders/wallet/:walletId", getRemindersByWallet);
 router.patch("/reminders/:id/pay", markReminderAsPaid);

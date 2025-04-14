@@ -10,10 +10,10 @@ import { authenticateToken } from "../middlewares/auth.middleware";
 
 const router = Router();
 
-router.post("/", authenticateToken, createTransaction);
-router.get("/", authenticateToken, getAllTransactions);
-router.get("/:id", authenticateToken, getTransactionById);
-router.put("/:id", authenticateToken, updateTransaction);
-router.delete("/:id", authenticateToken, deleteTransaction);
+router.post("/", authenticateToken as any, createTransaction);
+router.get("/", authenticateToken as any, getAllTransactions);
+router.get("/:id", authenticateToken as any, getTransactionById);
+router.put("/:id", authenticateToken as any, updateTransaction);
+router.delete("/:id", authenticateToken as any, deleteTransaction);
 
 export default router;

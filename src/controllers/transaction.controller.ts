@@ -8,6 +8,7 @@ import {
 } from "../services/transaction.service";
 import { AuthRequest } from "../middlewares/auth.middleware";
 
+const validIntervals = ["daily", "weekly", "monthly", "yearly"];
 export const createTransaction = async (req: AuthRequest, res: Response) => {
   try {
     const {
@@ -17,8 +18,15 @@ export const createTransaction = async (req: AuthRequest, res: Response) => {
       amount,
       date,
       description,
-      isRecurring,
+      isRecurring = false,
+      recurrenceInterval = null,
     } = req.body;
+    if (isRecurring && !validIntervals.includes(recurrenceInterval)) {
+      return res.status(400).json({
+        error:
+          "Intervalo de recorrência inválido. Use: daily, weekly, monthly ou yearly.",
+      });
+    }
     const transaction = await createTransactionService(
       walletId,
       typeId,

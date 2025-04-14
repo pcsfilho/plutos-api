@@ -19,7 +19,8 @@ export const createTransactionService = async (
   amount: number,
   date: string,
   description?: string,
-  isRecurring?: boolean
+  isRecurring?: boolean,
+  recurrenceInterval?: string
 ) => {
   const transaction = await prisma.transaction.create({
     data: {
@@ -30,6 +31,7 @@ export const createTransactionService = async (
       description: description,
       date: new Date(date),
       isRecurring: isRecurring || false,
+      recurrenceInterval: isRecurring ? recurrenceInterval || "monthly" : "",
     },
   });
 

@@ -1,0 +1,27 @@
+TransactionInput:
+  type: object
+  required:
+    - walletId
+    - typeId
+    - categoryId
+    - amount
+    - date
+  properties:
+    walletId:
+      type: integer
+    typeId:
+      type: integer
+    categoryId:
+      type: integer
+    amount:
+      type: number
+    description:
+      type: string
+    date:
+      type: string
+      format: date-time
+    isRecurring:
+      type: boolean
+    recurrenceInterval:
+      type: string
+      enum: [daily, weekly, monthly, yearly]

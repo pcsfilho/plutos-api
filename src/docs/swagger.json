@@ -199,6 +199,20 @@
           }
         }
       }
+    },
+    "/transactions": {
+      "post": {
+        "summary": "Criar nova transação",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransactionInput"
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
