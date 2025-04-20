@@ -11,7 +11,17 @@ import transactionRoutes from "./routes/transactions.routes";
 
 dotenv.config();
 const app = express();
+const cors = require("cors");
+
 app.use(express.json());
+// Configurações do CORS
+app.use(
+  cors({
+    origin: "http://localhost:5173", // Frontend rodando no Vite
+    methods: ["GET", "POST", "PUT", "DELETE"], // Métodos permitidos
+    allowedHeaders: ["Content-Type", "Authorization"], // Cabeçalhos permitidos
+  })
+);
 
 // swagger
 setupSwagger(app);
