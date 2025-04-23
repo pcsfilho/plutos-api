@@ -1,7 +1,6 @@
 import dotenv from "dotenv";
 import express from "express";
 import authRoutes from "./routes/auth.routes";
-import swaggerUi from "swagger-ui-express";
 import { setupSwagger } from "./config/swagger"; // ajuste o caminho conforme necessário
 import walletRoutes from "./routes/wallet.routes";
 import userRoutes from "./routes/user.routes";
@@ -26,7 +25,7 @@ app.use(
 // swagger
 setupSwagger(app);
 app.use("/auth", authRoutes);
-app.get("/", (req, res) => res.send("API online 🚀"));
+app.get("/", (req, res) => res.send("PLUTOS API IS ONLINE 🚀"));
 app.use("/users", userRoutes);
 app.use("/wallets", walletRoutes);
 app.use("/recurrings", recurringRoutes);
