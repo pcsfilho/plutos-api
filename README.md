@@ -1,94 +1,111 @@
-# plutos-api
+# 💰 Plutos API
 
-Controle Financeiro
+**Plutos API** is a **personal financial management** solution built with Node.js and TypeScript. It provides a robust backend API for managing wallets, transactions, reminders, and more.
 
-## Comandos
+---
 
-npm run dev Inicia a API em modo desenvolvimento
-npm run build Compila TypeScript para dist/
-npm start Executa o projeto compilado
-npm run prisma Atalho para qualquer comando Prisma
-npm run prisma:generate Gera o cliente Prisma a partir do schema
-npm run prisma:migrate Executa as migrações em desenvolvimento
-npm run prisma:migrate:deploy Aplica migrações em produção
-npm run prisma:studio Abre o Prisma Studio (UI web para ver os dados)
-npm run prisma:format Formata o schema.prisma
-npm run prisma:reset Apaga tudo, recria o banco e aplica migrações
+## 🚀 Tech Stack
 
-# ROADMAP
+- Node.js + TypeScript
+- Prisma ORM + PostgreSQL
+- JWT Authentication
+- Swagger for API documentation
+- Docker (optional for deployment)
 
-📊 1. Dashboard com Resumo Financeiro
+---
 
-- Destaques por carteira, mês e categoria: - Saldo atual - Total de entradas e saídas no mês - Gráfico de pizza por categoria - Gráfico de linha de saldo acumulado - Exemplo: GET /dashboard?walletId=1&month=04&year=2025
-  🏷️ 2. Filtros e Buscas
-- Permitir filtros nas transações: - Por data, categoria, tipo (entrada/saída) - Exemplo: GET /transactions?walletId=1&typeId=2&month=04&year=2025
-  🔁 3. Transações recorrentes
-  Adicione uma lógica para marcar uma transação como recorrente (isRecurring: true) e gerar as próximas mensalmente de forma automática (pode ser via cronjob ou agendamento manual).
+## 📦 Available Scripts
 
-🔔 4. Notificações por e-mail (ou push futuramente) - Lembretes de contas com vencimento próximo - Alerta de saldo negativo - Confirmação de transações
-💱 5. Conversão de moedas
-Se você tiver múltiplas carteiras com moedas diferentes (BRL, USD, EUR...), pode usar uma API externa para converter saldos e mostrar um total unificado.
+| Command                         | Description                            |
+| ------------------------------- | -------------------------------------- |
+| `npm run dev`                   | Starts the API in development mode     |
+| `npm run build`                 | Compiles TypeScript code into `dist/`  |
+| `npm start`                     | Runs the compiled project              |
+| `npm run prisma`                | Shortcut for Prisma commands           |
+| `npm run prisma:generate`       | Generates Prisma client from schema    |
+| `npm run prisma:migrate`        | Runs development migrations            |
+| `npm run prisma:migrate:deploy` | Applies migrations in production       |
+| `npm run prisma:studio`         | Opens Prisma Studio (UI to view data)  |
+| `npm run prisma:format`         | Formats the `schema.prisma` file       |
+| `npm run prisma:reset`          | Resets database and applies migrations |
 
-👥 6. Compartilhamento de carteiras
-Possibilidade de compartilhar uma carteira com outro usuário (ex: casal, sócio)
+---
 
-Definir permissões: visualizar, editar, só adicionar
+## 🗺️ Roadmap
 
-🧾 7. Upload de comprovantes / anexos
-Adicionar imagens ou PDFs em transações
+### ✅ Phase 1 – MVP (Implemented)
 
-Salvar caminho do arquivo na transação
+- [x] JWT Authentication
+- [x] User registration
+- [x] Wallet CRUD
+- [x] Transactions CRUD (with categories and types)
+- [x] Payment reminders CRUD
+- [x] Swagger API documentation
 
-🔐 8. 2FA ou reforço de segurança
-Autenticação em dois fatores (2FA)
+---
 
-Verificação de e-mail
+### 🚧 Phase 2 – Advanced Features
 
-Revalidação de senha para ações sensíveis
+| Item                      | Description                                    | Priority |
+| ------------------------- | ---------------------------------------------- | -------- |
+| 🔄 Recurring Transactions | Automatically generate monthly transactions    | High     |
+| 📊 Financial Dashboard    | Display total balance, income/expenses, charts | High     |
+| 🧾 Transaction Filters    | Filter by wallet, type, category, date         | High     |
+| 🛑 User Validation        | Ensure data belongs to the authenticated user  | High     |
+| 📁 Receipt Attachments    | Upload images or PDFs to transactions          | Medium   |
+| 📤 Export to CSV/PDF      | Generate reports by date range                 | Medium   |
+| 🌐 Currency Conversion    | Unified balance view using exchange rates      | Low      |
 
-🛠 9. Exportação de dados
-Gerar relatórios em CSV, Excel ou PDF por período
+---
 
-Enviar por e-mail ou baixar direto
+### 🧪 Phase 3 – UX and Scalability
 
-📱 10. Modo mobile / app
-Com a API pronta, você pode futuramente fazer um app com Vue (Quasar) ou Flutter, consumindo sua própria API.
+| Item                           | Description                              | Priority |
+| ------------------------------ | ---------------------------------------- | -------- |
+| 🛡️ 2FA / Email Verification    | Strengthen account security              | Medium   |
+| 🧑‍🤝‍🧑 Shared Wallets              | Multi-user access with permission levels | Medium   |
+| 🔔 Email Notifications         | Reminders, low balance alerts, etc.      | Medium   |
+| 📱 Mobile App (Vue or Flutter) | Consume API with a native or PWA app     | Low      |
 
-✅ Fase 1 – MVP Básico (já iniciado)
-Item Status Prioridade Observações
-Autenticação com JWT ✅ Pronto Alta Login, proteção de rotas
-Cadastro de usuários ✅ Pronto Alta
-CRUD de carteiras ✅ Pronto Alta
-CRUD de transações (entradas/saídas) ✅ Pronto Alta Com categorias e tipos
-CRUD de lembretes de contas ✅ Pronto Alta Alerta de contas a pagar
-Swagger documentado ✅ Pronto Média
+---
 
-🚧 Fase 2 – Funcionalidades Avançadas
-Item Descrição Prioridade
-🔄 Transações recorrentes Gerar transações futuras automaticamente com base em uma inicial Alta
-📊 Dashboard financeiro Exibir saldo total, entradas/saídas do mês, gráficos Alta
-🧾 Filtros nas transações Filtrar por carteira, categoria, tipo, data Alta
-🛑 Validação por usuário Garantir que os dados consultados pertencem ao usuário autenticado Alta
-📁 Anexar comprovantes Upload de imagem ou PDF em transações Média
-📤 Exportação para CSV/PDF Exportar transações por período Média
-🌐 Conversão de moedas Mostrar saldo total considerando taxas de câmbio Baixa
+### 📆 Phase 4 – Maintenance, Testing & Deployment
 
-🧪 Fase 3 – Experiência do Usuário e Escalabilidade
-Item Descrição Prioridade
-🛡️ 2FA ou verificação de e-mail Reforço de segurança na autenticação Média
-🧑‍🤝‍🧑 Compartilhamento de carteiras Carteiras compartilhadas com outros usuários Média
-🔔 Notificações por e-mail Alertas de lembretes, saldo baixo, etc. Média
-📱 Início de um App (Vue ou Flutter) Consumir API para uso mobile Baixa
+| Item                          | Description                             | Priority |
+| ----------------------------- | --------------------------------------- | -------- |
+| 🔧 Unit and Integration Tests | Ensure code quality and stability       | High     |
+| 📦 Cloud Deployment           | Deploy on Render, Railway, or VPS       | High     |
+| 🗄️ Seed and Test Data         | Populate database with example data     | Medium   |
+| 📝 Technical Documentation    | Explain how to run, use, and contribute | Medium   |
 
-📆 Fase 4 – Manutenção, Testes e Deploy
-Item Descrição Prioridade
-🔧 Testes unitários e integração Garantir qualidade do código Alta
-📦 Deploy em ambiente cloud Subir API no Render, Railway ou VPS Alta
-🗄️ Seed e dados de teste Popular base com exemplos para simulações Média
-📝 Documentação técnica Explicar como rodar, usar e colaborar no projeto Média
+---
 
-💡 Extras Futuramente
-Item Descrição
-💬 IA para análise Sugestões de economia, hábitos, alertas
-📍 Geolocalização Marcar local da compra, útil no app
-🔗 API pública Permitir integrações com apps externos
+### 💡 Future Ideas / Extras
+
+| Item           | Description                                       |
+| -------------- | ------------------------------------------------- |
+| 💬 AI Insights | Financial advice, alerts, and savings suggestions |
+| 📍 Geolocation | Tag purchase locations (useful for mobile)        |
+| 🔗 Public API  | Allow third-party integrations with tokens        |
+
+---
+
+## 📊 Planned Endpoints Example
+
+- `GET /dashboard?walletId=1&month=04&year=2025` → Financial dashboard
+- `GET /transactions?walletId=1&typeId=2&month=04&year=2025` → Filtered transactions by type, month, and wallet
+
+---
+
+## 🧑‍💻 Contributing
+
+Feel free to open issues, suggest features, or submit pull requests. This project is under active development!
+
+---
+
+## 📄 License
+
+MIT © Paulo Filho  
+[https://pcsfor.com.br](https://pcsfor.com.br)
+
+---
