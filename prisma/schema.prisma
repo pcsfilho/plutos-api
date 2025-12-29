@@ -7,26 +7,78 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Enums para o sistema
+enum AccountType {
+  PF  // Pessoa Física
+  PJ  // Pessoa Jurídica
+}
+
+enum WalletType {
+  CHECKING_ACCOUNT  // Conta Corrente
+  SAVINGS          // Poupança
+  CREDIT_CARD      // Cartão de Crédito
+  CASH             // Dinheiro
+}
+
+enum BankProvider {
+  NUBANK
+  INTER
+  C6
+  GENERIC
+}
+
 model User {
-  id        Int      @id @default(autoincrement())
+  id        Int       @id @default(autoincrement())
   name      String
-  email     String   @unique
+  email     String    @unique
   password  String
-  wallets   Wallet[]
-  createdAt DateTime @default(now())
+  accounts  Account[] // Usuário pode ter múltiplas contas (PF e/ou PJ)
+  createdAt DateTime  @default(now())
+}
+
+// Model Account - Representa uma conta PF ou PJ do usuário
+model Account {
+  id            Int             @id @default(autoincrement())
+  userId        Int
+  type          AccountType     // PF ou PJ
+  name          String          // Ex: "Pessoal", "Empresa XYZ Ltda"
+  document      String?         // CPF (PF) ou CNPJ (PJ)
+  isActive      Boolean         @default(true)
+
+  user          User            @relation(fields: [userId], references: [id])
+  wallets       Wallet[]        // Account possui múltiplas carteiras
+  categoryRules CategoryRule[]  // Regras de categorização da conta
+  importHistory ImportHistory[] // Histórico de importações da conta
+
+  createdAt     DateTime        @default(now())
+
+  @@index([userId])
+  @@index([type])
 }
 
 model Wallet {
-  id             Int           @id @default(autoincrement())
+  id             Int             @id @default(autoincrement())
+  accountId      Int             // Wallet pertence a uma Account (PF ou PJ)
   name           String
   currencyId     Int
-  userId         Int
   initialBalance Float
-  user           User          @relation(fields: [userId], references: [id])
-  currency       Currency      @relation(fields: [currencyId], references: [id])
+
+  // Campos para cartão de crédito
+  type           WalletType      @default(CHECKING_ACCOUNT)
+  creditLimit    Float?          // Limite do cartão (apenas para CREDIT_CARD)
+  dueDay         Int?            // Dia de vencimento (apenas para CREDIT_CARD)
+  closingDay     Int?            // Dia de fechamento da fatura (apenas para CREDIT_CARD)
+
+  account        Account         @relation(fields: [accountId], references: [id])
+  currency       Currency        @relation(fields: [currencyId], references: [id])
   transactions   Transaction[]
   reminders      Reminder[]
-  createdAt DateTime @default(now())
+  categoryRules  CategoryRule[]  // Regras específicas desta wallet
+  importHistory  ImportHistory[] // Histórico de importações desta wallet
+
+  createdAt      DateTime        @default(now())
+
+  @@index([accountId])
 }
 
 model Currency {
@@ -40,29 +92,36 @@ model Currency {
 }
 
 model Transaction {
-  id          Int      @id @default(autoincrement())
-  walletId    Int
-  typeId      Int
-  categoryId  Int
-  amount      Float
-  description String?
-  date        DateTime
-  isRecurring Boolean  @default(false)
-  recurrenceInterval String? // "daily" | "weekly" | "monthly" | "yearly"
+  id                 Int      @id @default(autoincrement())
+  walletId           Int
+  typeId             Int
+  categoryId         Int
+  amount             Float
+  description        String?
+  date               DateTime
+  isRecurring        Boolean  @default(false)
+  recurrenceInterval String?  // "daily" | "weekly" | "monthly" | "yearly"
 
-  wallet   Wallet          @relation(fields: [walletId], references: [id])
-  type     TransactionType @relation(fields: [typeId], references: [id])
-  category Category        @relation(fields: [categoryId], references: [id])
-  createdAt DateTime @default(now())
+  // Novo campo para rastreamento de importações
+  importedFrom       String?  // Identificador da importação (ex: "import_2025_01_15_123")
+
+  wallet             Wallet          @relation(fields: [walletId], references: [id])
+  type               TransactionType @relation(fields: [typeId], references: [id])
+  category           Category        @relation(fields: [categoryId], references: [id])
+  createdAt          DateTime        @default(now())
+
+  // Índice composto para detecção eficiente de duplicatas
+  @@index([walletId, date, amount, description])
 }
 
 model Category {
-  id           Int             @id @default(autoincrement())
-  name         String
-  typeId       Int
-  type         TransactionType @relation(fields: [typeId], references: [id])
-  transactions Transaction[]
-  createdAt DateTime @default(now())
+  id            Int             @id @default(autoincrement())
+  name          String
+  typeId        Int
+  type          TransactionType @relation(fields: [typeId], references: [id])
+  transactions  Transaction[]
+  categoryRules CategoryRule[]  // Regras que usam esta categoria
+  createdAt     DateTime        @default(now())
 }
 
 model TransactionType {
@@ -83,4 +142,46 @@ model Reminder {
   createdAt   DateTime @default(now())
 
   wallet Wallet @relation(fields: [walletId], references: [id])
+}
+
+// Model para regras de categorização automática
+model CategoryRule {
+  id          Int      @id @default(autoincrement())
+  accountId   Int      // Cada conta (PF/PJ) tem suas próprias regras
+  walletId    Int?     // Opcional: regra específica para uma wallet
+  pattern     String   // Padrão de texto para matching (ex: "uber", "ifood")
+  categoryId  Int      // Categoria a ser aplicada quando o padrão combinar
+  priority    Int      @default(0) // Prioridade (maior = mais prioritário)
+  isActive    Boolean  @default(true)
+
+  account     Account  @relation(fields: [accountId], references: [id])
+  wallet      Wallet?  @relation(fields: [walletId], references: [id])
+  category    Category @relation(fields: [categoryId], references: [id])
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([accountId])
+  @@index([pattern])
+}
+
+// Model para histórico de importações
+model ImportHistory {
+  id              Int          @id @default(autoincrement())
+  accountId       Int          // Importação pertence a uma conta (PF/PJ)
+  walletId        Int
+  fileName        String
+  bankProvider    BankProvider
+  totalRows       Int          // Total de linhas no CSV
+  importedRows    Int          // Linhas efetivamente importadas
+  duplicatedRows  Int          // Linhas identificadas como duplicatas
+  errorRows       Int          // Linhas com erro
+  status          String       // "SUCCESS", "PARTIAL", "FAILED"
+
+  account         Account      @relation(fields: [accountId], references: [id])
+  wallet          Wallet       @relation(fields: [walletId], references: [id])
+
+  createdAt       DateTime     @default(now())
+
+  @@index([accountId])
 }

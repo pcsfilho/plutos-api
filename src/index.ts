@@ -7,6 +7,7 @@ import userRoutes from "./routes/user.routes";
 import recurringRoutes from "./routes/recurring.routes";
 import reminderRoutes from "./routes/reminder.routes";
 import transactionRoutes from "./routes/transactions.routes";
+import accountRoutes from "./routes/account.routes"; // NOVO: Rotas de contas PF/PJ e importação
 
 dotenv.config();
 const app = express();
@@ -27,6 +28,7 @@ setupSwagger(app);
 app.use("/auth", authRoutes);
 app.get("/", (req, res) => res.send("PLUTOS API IS ONLINE 🚀"));
 app.use("/users", userRoutes);
+app.use("/accounts", accountRoutes); // NOVO: Contas PF/PJ, regras e importação
 app.use("/wallets", walletRoutes);
 app.use("/recurrings", recurringRoutes);
 app.use("/reminders", reminderRoutes);

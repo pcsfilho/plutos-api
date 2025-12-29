@@ -4,19 +4,26 @@ const prisma = new PrismaClient();
 
 interface CreateWalletData {
   name: string;
-  currency: string;
-  balance: number;
-  userId: number;
+  currencyId: number;
+  initialBalance: number;
+  accountId: number; // ATUALIZADO: agora usa accountId
 }
 
 export const createWalletService = async (data: CreateWalletData) => {
-  const wallet = await prisma.wallet.create({ data });
+  const wallet = await prisma.wallet.create({
+    data: {
+      name: data.name,
+      currencyId: data.currencyId,
+      initialBalance: data.initialBalance,
+      accountId: data.accountId,
+    }
+  });
   return wallet;
 };
 
-export const listWalletsService = async (userId: number) => {
+export const listWalletsService = async (accountId: number) => {
   const wallets = await prisma.wallet.findMany({
-    where: { userId },
+    where: { accountId }, // ATUALIZADO: agora usa accountId
     orderBy: { createdAt: "desc" },
   });
 
