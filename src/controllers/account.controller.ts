@@ -8,6 +8,7 @@ import {
   deleteAccountService,
   deactivateAccountService,
   activateAccountService,
+  getUpcomingSubscriptionsByAccountService,
 } from "../services/account.service";
 import { AccountType } from "@prisma/client";
 
@@ -154,6 +155,31 @@ export const activateAccount = async (req: AuthRequest, res: Response) => {
     return res.json(account);
   } catch (error: any) {
     console.error("Erro ao ativar conta:", error);
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+/**
+ * GET /accounts/:id/subscriptions/upcoming
+ * Lista subscriptions pendentes de todas as wallets da conta
+ */
+export const getUpcomingSubscriptionsByAccount = async (
+  req: AuthRequest,
+  res: Response
+) => {
+  try {
+    const accountId = Number(req.params.id);
+    const userId = req.user.userId;
+    const daysAhead = req.query.daysAhead ? Number(req.query.daysAhead) : 7;
+
+    const result = await getUpcomingSubscriptionsByAccountService(
+      accountId,
+      userId,
+      daysAhead
+    );
+    return res.json(result);
+  } catch (error: any) {
+    console.error("Erro ao buscar subscriptions pendentes da conta:", error);
     return res.status(500).json({ error: error.message });
   }
 };

@@ -8,6 +8,9 @@ import recurringRoutes from "./routes/recurring.routes";
 import reminderRoutes from "./routes/reminder.routes";
 import transactionRoutes from "./routes/transactions.routes";
 import accountRoutes from "./routes/account.routes"; // NOVO: Rotas de contas PF/PJ e importação
+import subscriptionRoutes from "./routes/subscription.routes"; // NOVO: Subscriptions (estilo Firefly III)
+import currencyRoutes from "./routes/currency.routes"; // Rotas de moedas
+import categoryRoutes from "./routes/category.routes"; // Rotas de categorias
 
 dotenv.config();
 const app = express();
@@ -33,6 +36,9 @@ app.use("/wallets", walletRoutes);
 app.use("/recurrings", recurringRoutes);
 app.use("/reminders", reminderRoutes);
 app.use("/transactions", transactionRoutes);
+app.use("/categories", categoryRoutes); // Categorias
+app.use("/currencies", currencyRoutes); // Moedas
+app.use(subscriptionRoutes); // NOVO: Subscriptions (Firefly III style)
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

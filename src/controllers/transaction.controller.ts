@@ -45,11 +45,80 @@ export const createTransaction = async (req: AuthRequest, res: Response) => {
 
 export const getAllTransactions = async (req: Request, res: Response) => {
   try {
-    const walletId = parseInt(req.params.walletId);
+    const {
+      walletId,
+      accountId,
+      startDate,
+      endDate,
+      typeId,
+      categoryId,
+      subscriptionId,
+      importedFrom,
+      isImported,
+      hasSubscription,
+      description,
+      page,
+      limit,
+    } = req.query;
 
-    const transactions = await getAllTransactionsService(walletId);
-    res.json(transactions);
+    // Converter para número se fornecido
+    const walletIdNum = walletId ? parseInt(walletId as string) : undefined;
+    const accountIdNum = accountId ? parseInt(accountId as string) : undefined;
+    const typeIdNum = typeId ? parseInt(typeId as string) : undefined;
+    const categoryIdNum = categoryId
+      ? parseInt(categoryId as string)
+      : undefined;
+    const subscriptionIdNum = subscriptionId
+      ? parseInt(subscriptionId as string)
+      : undefined;
+
+    // Converter para boolean
+    const isImportedBool =
+      isImported === "true"
+        ? true
+        : isImported === "false"
+        ? false
+        : undefined;
+    const hasSubscriptionBool =
+      hasSubscription === "true"
+        ? true
+        : hasSubscription === "false"
+        ? false
+        : undefined;
+
+    // Parâmetros de paginação
+    const pageNum = page ? parseInt(page as string) : 1;
+    const limitNum = limit ? parseInt(limit as string) : 50;
+
+    // Validar paginação
+    if (pageNum < 1) {
+      return res.status(400).json({ error: "page deve ser >= 1" });
+    }
+    if (limitNum < 1 || limitNum > 100) {
+      return res
+        .status(400)
+        .json({ error: "limit deve ser entre 1 e 100" });
+    }
+
+    const result = await getAllTransactionsService(
+      walletIdNum,
+      accountIdNum,
+      startDate as string | undefined,
+      endDate as string | undefined,
+      typeIdNum,
+      categoryIdNum,
+      subscriptionIdNum,
+      importedFrom as string | undefined,
+      isImportedBool,
+      hasSubscriptionBool,
+      description as string | undefined,
+      pageNum,
+      limitNum
+    );
+
+    res.json(result);
   } catch (err) {
+    console.error("Erro ao buscar transações:", err);
     res.status(500).json({ error: "Erro ao buscar transações" });
   }
 };

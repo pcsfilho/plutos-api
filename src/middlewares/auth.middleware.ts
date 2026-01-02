@@ -5,6 +5,7 @@ const JWT_SECRET = process.env.JWT_SECRET || "secret_inseguro";
 
 export interface AuthRequest extends Request {
   user?: any;
+  file?: Express.Multer.File; // Suporte a upload de arquivo
 }
 
 export const authenticateToken = (

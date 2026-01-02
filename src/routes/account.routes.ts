@@ -8,6 +8,7 @@ import {
   deleteAccount,
   deactivateAccount,
   activateAccount,
+  getUpcomingSubscriptionsByAccount,
 } from "../controllers/account.controller";
 import {
   createCategoryRule,
@@ -22,6 +23,7 @@ import {
   getImportHistory,
 } from "../controllers/import.controller";
 import { authenticateToken } from "../middlewares/auth.middleware";
+import { uploadCSV } from "../middlewares/upload.middleware";
 
 const router = Router();
 
@@ -41,6 +43,9 @@ router.delete("/:id", deleteAccount);
 router.post("/:id/deactivate", deactivateAccount);
 router.post("/:id/activate", activateAccount);
 
+// Subscriptions agregadas da conta
+router.get("/:id/subscriptions/upcoming", getUpcomingSubscriptionsByAccount);
+
 // ===== ROTAS DE REGRAS DE CATEGORIZAÇÃO =====
 
 router.post("/:accountId/category-rules", createCategoryRule);
@@ -53,6 +58,7 @@ router.delete("/:accountId/category-rules/:id", deleteCategoryRule);
 
 router.post(
   "/:accountId/wallets/:walletId/import-preview",
+  uploadCSV.single("file"), // Middleware para aceitar upload de arquivo (opcional)
   generateImportPreview
 );
 router.post(

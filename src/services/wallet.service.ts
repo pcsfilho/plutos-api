@@ -21,9 +21,15 @@ export const createWalletService = async (data: CreateWalletData) => {
   return wallet;
 };
 
-export const listWalletsService = async (accountId: number) => {
+export const listWalletsService = async (accountId?: number) => {
+  const where: any = {};
+
+  if (accountId) {
+    where.accountId = accountId;
+  }
+
   const wallets = await prisma.wallet.findMany({
-    where: { accountId }, // ATUALIZADO: agora usa accountId
+    where,
     orderBy: { createdAt: "desc" },
   });
 

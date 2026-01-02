@@ -27,7 +27,10 @@ export const createWallet = async (req: AuthRequest, res: Response) => {
 
 export const listWallets = async (req: AuthRequest, res: Response) => {
   try {
-    const wallets = await listWalletsService(req.user.userId);
+    const { accountId } = req.query;
+    const accountIdNum = accountId ? parseInt(accountId as string) : undefined;
+
+    const wallets = await listWalletsService(accountIdNum);
     return res.json(wallets);
   } catch (error: any) {
     return res.status(500).json({ error: error.message });

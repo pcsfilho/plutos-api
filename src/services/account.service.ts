@@ -1,4 +1,5 @@
 import { PrismaClient, AccountType } from "@prisma/client";
+import { addDays, isBefore, isAfter } from "date-fns";
 
 const prisma = new PrismaClient();
 
@@ -216,4 +217,63 @@ export const activateAccountService = async (
   userId: number
 ) => {
   return updateAccountService(accountId, userId, { isActive: true });
+};
+
+/**
+ * Lista subscriptions pendentes de todas as wallets da conta
+ */
+export const getUpcomingSubscriptionsByAccountService = async (
+  accountId: number,
+  userId: number,
+  daysAhead: number = 7
+) => {
+  // Verifica se a conta pertence ao usuário
+  const account = await prisma.account.findFirst({
+    where: {
+      id: accountId,
+      userId: userId,
+    },
+  });
+
+  if (!account) {
+    throw new Error("Conta não encontrada ou não pertence ao usuário");
+  }
+
+  const today = new Date();
+  const futureDate = addDays(today, daysAhead);
+
+  // Busca todas as subscriptions ativas de todas as wallets da conta
+  const subscriptions = await prisma.subscription.findMany({
+    where: {
+      wallet: {
+        accountId: accountId,
+      },
+      isActive: true,
+      nextDueDate: {
+        lte: futureDate,
+      },
+    },
+    include: {
+      wallet: {
+        select: {
+          id: true,
+          name: true,
+          type: true,
+        },
+      },
+    },
+    orderBy: { nextDueDate: "asc" },
+  });
+
+  // Separa em atrasadas e próximas
+  const overdue = subscriptions.filter((s) => isBefore(s.nextDueDate, today));
+  const upcoming = subscriptions.filter(
+    (s) => !isBefore(s.nextDueDate, today) && !isAfter(s.nextDueDate, futureDate)
+  );
+
+  return {
+    overdue,
+    upcoming,
+    total: subscriptions.length,
+  };
 };

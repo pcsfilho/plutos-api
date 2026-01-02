@@ -60,6 +60,10 @@ export interface PreviewTransaction extends ParsedTransaction {
     ruleId: number;
     pattern: string;
   };
+  // Auto-matching com subscriptions
+  suggestedSubscriptionId?: number | null;
+  suggestedSubscriptionName?: string | null;
+  subscriptionMatchConfidence?: number; // 0-100
   errors?: string[]; // Erros de validação, se houver
 }
 

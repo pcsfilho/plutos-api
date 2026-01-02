@@ -19,13 +19,24 @@ export const generateImportPreview = async (
   try {
     const accountId = Number(req.params.accountId);
     const walletId = Number(req.params.walletId);
-    const { csvContent, bankProvider } = req.body;
 
+    // Suporta tanto upload de arquivo quanto JSON
+    let csvContent: string;
+    let bankProvider: string;
+    // Verifica se é upload de arquivo (multipart/form-data)
+    if (req.file) {
+      csvContent = req.file.buffer.toString("utf-8");
+      bankProvider = req.body.bankProvider;
+    } else {
+      // JSON direto
+      csvContent = req.body.csvContent;
+      bankProvider = req.body.bankProvider;
+    }
     // Validações básicas
     if (!csvContent || !bankProvider) {
-      return res
-        .status(400)
-        .json({ error: "Campos obrigatórios: csvContent, bankProvider" });
+      return res.status(400).json({
+        error: "Campos obrigatórios: csvContent ou file, bankProvider",
+      });
     }
 
     // Valida provider
@@ -77,9 +88,7 @@ export const confirmImport = async (req: AuthRequest, res: Response) => {
     }
 
     if (transactions.length === 0) {
-      return res
-        .status(400)
-        .json({ error: "Nenhuma transação para importar" });
+      return res.status(400).json({ error: "Nenhuma transação para importar" });
     }
 
     // Executa importação

@@ -10,8 +10,13 @@ import {
 export const BANK_CSV_CONFIGS: Record<BankProvider, BankCSVMapping> = {
   /**
    * Configuração para Nubank
-   * Formato esperado: date,category,title,amount
-   * Exemplo: 2025-01-15,transport,Uber - Viagem,-25.50
+   * Formato REAL: date,title,amount
+   * Regras:
+   * - Valores POSITIVOS = Saída (despesa)
+   * - Valores NEGATIVOS = Entrada (pagamento recebido/estorno)
+   * Exemplo:
+   *   2025-11-24,Mercadolivre*4produto,135.89        (Saída)
+   *   2025-11-02,Pagamento recebido,-570.11          (Entrada)
    */
   [BankProvider.NUBANK]: {
     provider: BankProvider.NUBANK,
@@ -22,11 +27,11 @@ export const BANK_CSV_CONFIGS: Record<BankProvider, BankCSVMapping> = {
       date: "date",
       description: "title",
       amount: "amount",
-      category: "category",
     },
     dateFormat: "YYYY-MM-DD",
     amountParser: (value: string): number => {
-      // Nubank usa formato: "-123.45" (negativo para despesas)
+      // Nubank: valor positivo = saída, valor negativo = entrada
+      // Já vem no formato correto: 135.89 ou -570.11
       const cleaned = value.trim().replace(",", ".");
       return parseFloat(cleaned);
     },
@@ -62,24 +67,38 @@ export const BANK_CSV_CONFIGS: Record<BankProvider, BankCSVMapping> = {
 
   /**
    * Configuração para C6 Bank
-   * Formato esperado: Data da transação,Categoria,Descrição,Valor
-   * Exemplo: 15/01/2025,Transporte,Uber - Viagem,-25.50
+   * Formato REAL (Fatura de Cartão):
+   * Data de Compra;Nome no Cartão;Final do Cartão;Categoria;Descrição;Parcela;Valor (em US$);Cotação (em R$);Valor (em R$)
+   *
+   * Regras:
+   * - Separador: ; (ponto-e-vírgula)
+   * - Data: DD/MM/YYYY
+   * - Valor em R$: última coluna (índice 8)
+   * - Valores NEGATIVOS = Entrada (estorno/pagamento)
+   * - Valores POSITIVOS = Saída (compra)
+   * - Categoria já vem no CSV
+   * - Parcelas: "Única", "X/Y" ou vazio
+   *
+   * Exemplo:
+   *   15/11/2025;PAULO FILHO;0680;Serviços pessoais;MP *KOTAS;Única;0;0;11.06
+   *   09/11/2025;PAULO FILHO;4736;-;"Inclusao de Pagamento";Única;0;0;-818.65
    */
   [BankProvider.C6]: {
     provider: BankProvider.C6,
-    delimiter: ",",
+    delimiter: ";",
     encoding: "utf-8",
     hasHeader: true,
     columns: {
-      date: "Data da transação",
+      date: "Data de Compra",
       description: "Descrição",
-      amount: "Valor",
+      amount: "Valor (em R$)",
       category: "Categoria",
     },
     dateFormat: "DD/MM/YYYY",
     amountParser: (value: string): number => {
-      // C6 usa formato: "1234.56" ou "-1234.56"
-      const cleaned = value.trim().replace(",", ".");
+      // C6 Bank: valores vem com PONTO como decimal (ex: 29.05, -818.65)
+      // Diferente do formato brasileiro tradicional
+      const cleaned = value.trim();
       return parseFloat(cleaned);
     },
   },

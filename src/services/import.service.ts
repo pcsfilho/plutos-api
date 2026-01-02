@@ -12,8 +12,41 @@ import {
   validateCSVFile,
 } from "../utils/csv-parser.util";
 import { applyCategoryRulesService } from "./category-rule.service";
+import { matchTransactionToSubscriptionService } from "./subscription.service";
 
 const prisma = new PrismaClient();
+
+/**
+ * Determina o tipo da transação (Entrada/Saída) baseado no valor e no banco
+ *
+ * REGRAS POR BANCO:
+ * - NUBANK:  valor POSITIVO = saída  | valor NEGATIVO = entrada
+ * - C6:      valor POSITIVO = saída  | valor NEGATIVO = entrada (estorno/pagamento)
+ * - INTER:   valor NEGATIVO = saída  | valor POSITIVO = entrada
+ * - GENERIC: valor NEGATIVO = saída  | valor POSITIVO = entrada
+ */
+function determineTransactionType(
+  amount: number,
+  provider: BankProvider,
+  typeIncome: { id: number },
+  typeExpense: { id: number }
+): number {
+  // Nubank e C6: positivo = saída, negativo = entrada
+  if (provider === BankProvider.NUBANK || provider === BankProvider.C6) {
+    return amount > 0 ? typeExpense.id : typeIncome.id;
+  }
+
+  // Padrão (Inter, Generic): negativo = saída, positivo = entrada
+  return amount < 0 ? typeExpense.id : typeIncome.id;
+}
+
+/**
+ * Normaliza o valor da transação para sempre ser positivo
+ * (armazenamos sempre valor absoluto no banco)
+ */
+function normalizeAmount(amount: number): number {
+  return Math.abs(amount);
+}
 
 /**
  * Detecta se uma transação é duplicata
@@ -104,6 +137,14 @@ export const generateImportPreviewService = async (
         walletId
       );
 
+      // Tenta fazer auto-matching com subscriptions
+      const subscriptionMatch = await matchTransactionToSubscriptionService(
+        walletId,
+        transaction.description,
+        Math.abs(transaction.amount),
+        transaction.date
+      );
+
       previewTransactions.push({
         ...transaction,
         isDuplicate: duplicateCheck.isDuplicate,
@@ -111,6 +152,9 @@ export const generateImportPreviewService = async (
         suggestedCategoryId: categoryMatch.categoryId,
         suggestedCategoryName: categoryMatch.categoryName,
         matchedRule: categoryMatch.matchedRule,
+        suggestedSubscriptionId: subscriptionMatch.subscriptionId,
+        suggestedSubscriptionName: subscriptionMatch.subscription?.title,
+        subscriptionMatchConfidence: subscriptionMatch.confidence,
       });
     } catch (error: any) {
       errorCount++;
@@ -253,24 +297,64 @@ export const confirmImportService = async (
       // Importa cada transação
       for (const transaction of transactionsToImport) {
         try {
-          // Determina tipo baseado no valor (negativo = saída, positivo = entrada)
-          const typeId =
-            transaction.amount < 0 ? typeExpense.id : typeIncome.id;
+          // Determina tipo baseado no valor e provider do banco
+          const typeId = determineTransactionType(
+            transaction.amount,
+            bankProvider,
+            typeIncome,
+            typeExpense
+          );
+
           const categoryId =
             transaction.suggestedCategoryId || defaultCategory!.id;
+
+          // Vincula com subscription se houver match (confiança >= 50%)
+          const subscriptionId =
+            transaction.suggestedSubscriptionId &&
+            (transaction.subscriptionMatchConfidence || 0) >= 50
+              ? transaction.suggestedSubscriptionId
+              : null;
 
           await tx.transaction.create({
             data: {
               walletId: walletId,
               typeId: typeId,
               categoryId: categoryId,
-              amount: Math.abs(transaction.amount), // Sempre positivo no banco
+              amount: normalizeAmount(transaction.amount), // Sempre positivo no banco
               description: transaction.description.substring(0, 255), // Limita tamanho
               date: transaction.date,
               importedFrom: importId,
               isRecurring: false,
+              subscriptionId: subscriptionId,
             },
           });
+
+          // Se vinculou com subscription, atualiza lastPaidDate e nextDueDate
+          if (subscriptionId) {
+            const subscription = await tx.subscription.findUnique({
+              where: { id: subscriptionId },
+            });
+
+            if (subscription) {
+              const { calculateNextDueDate } = await import("./subscription.service");
+              const nextDueDate = calculateNextDueDate(
+                transaction.date,
+                subscription.frequency,
+                subscription.dayOfMonth || undefined,
+                subscription.dayOfWeek || undefined,
+                subscription.monthOfYear || undefined
+              );
+
+              await tx.subscription.update({
+                where: { id: subscriptionId },
+                data: {
+                  lastPaidDate: transaction.date,
+                  lastPaidAmount: Math.abs(transaction.amount),
+                  nextDueDate: nextDueDate,
+                },
+              });
+            }
+          }
 
           importedCount++;
         } catch (error: any) {

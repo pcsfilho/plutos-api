@@ -14,7 +14,8 @@
     "prisma:studio": "prisma studio",
     "prisma:format": "prisma format",
     "prisma:reset": "prisma migrate reset --force",
-    "seed": "ts-node prisma/seed.ts"
+    "seed": "ts-node prisma/seed.ts",
+    "seed:2025": "npx tsx prisma/seed-2025-transactions.ts"
   },
   "repository": {
     "type": "git",
@@ -29,12 +30,14 @@
   "homepage": "https://github.com/pcsfilho/plutos-api#readme",
   "dependencies": {
     "@prisma/client": "^6.5.0",
+    "@types/multer": "^2.0.0",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "date-fns": "^4.1.0",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
+    "multer": "^2.0.2",
     "prisma": "^6.5.0",
     "swagger-ui-express": "^5.0.1",
     "tsoa": "^6.6.0"

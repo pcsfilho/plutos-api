@@ -9,6 +9,7 @@ async function main() {
   // Limpa o banco (cuidado em produção!)
   console.log("🗑️  Limpando banco de dados...");
   await prisma.importHistory.deleteMany();
+  await prisma.subscription.deleteMany();
   await prisma.categoryRule.deleteMany();
   await prisma.transaction.deleteMany();
   await prisma.reminder.deleteMany();
@@ -476,6 +477,309 @@ async function main() {
 
   console.log("   ✅ 2 registros de histórico criados");
 
+  // ===== 14. CRIAR SUBSCRIPTIONS - CONTA PF =====
+  console.log("\n🔔 Criando subscriptions da conta PF...");
+
+  const subNetflix = await prisma.subscription.create({
+    data: {
+      walletId: walletNubankPF.id,
+      title: "Netflix",
+      description: "Assinatura mensal de streaming",
+      frequency: "MONTHLY",
+      dayOfMonth: 10,
+      expectedAmount: 55.90,
+      minAmount: 50.00,
+      maxAmount: 60.00,
+      matchPattern: "netflix",
+      nextDueDate: new Date("2025-02-10"),
+      lastPaidDate: new Date("2025-01-10"),
+      lastPaidAmount: 55.90,
+      isActive: true,
+    },
+  });
+
+  const subSpotify = await prisma.subscription.create({
+    data: {
+      walletId: walletNubankPF.id,
+      title: "Spotify Premium",
+      description: "Plano Individual",
+      frequency: "MONTHLY",
+      dayOfMonth: 12,
+      expectedAmount: 21.90,
+      minAmount: 20.00,
+      maxAmount: 25.00,
+      matchPattern: "spotify",
+      nextDueDate: new Date("2025-02-12"),
+      lastPaidDate: new Date("2025-01-12"),
+      lastPaidAmount: 21.90,
+      isActive: true,
+    },
+  });
+
+  const subAmazonPrime = await prisma.subscription.create({
+    data: {
+      walletId: walletNubankPF.id,
+      title: "Amazon Prime",
+      description: "Assinatura anual Amazon Prime",
+      frequency: "MONTHLY",
+      dayOfMonth: 8,
+      expectedAmount: 14.90,
+      minAmount: 14.00,
+      maxAmount: 20.00,
+      matchPattern: "amazon prime",
+      nextDueDate: new Date("2025-02-08"),
+      lastPaidDate: new Date("2025-01-08"),
+      lastPaidAmount: 14.90,
+      isActive: true,
+    },
+  });
+
+  const subAluguel = await prisma.subscription.create({
+    data: {
+      walletId: walletContaCorrente.id,
+      title: "Aluguel",
+      description: "Aluguel residencial",
+      frequency: "MONTHLY",
+      dayOfMonth: 10,
+      expectedAmount: 1500.00,
+      minAmount: 1500.00,
+      maxAmount: 1500.00,
+      matchPattern: "aluguel",
+      nextDueDate: new Date("2025-02-10"),
+      lastPaidDate: new Date("2025-01-10"),
+      lastPaidAmount: 1500.00,
+      isActive: true,
+    },
+  });
+
+  const subEnergia = await prisma.subscription.create({
+    data: {
+      walletId: walletContaCorrente.id,
+      title: "Conta de Luz",
+      description: "Energia elétrica - Cemig",
+      frequency: "MONTHLY",
+      dayOfMonth: 12,
+      expectedAmount: 210.50,
+      minAmount: 150.00,
+      maxAmount: 300.00,
+      matchPattern: "cemig",
+      nextDueDate: new Date("2025-02-12"),
+      lastPaidDate: new Date("2025-01-12"),
+      lastPaidAmount: 210.50,
+      isActive: true,
+    },
+  });
+
+  const subAgua = await prisma.subscription.create({
+    data: {
+      walletId: walletContaCorrente.id,
+      title: "Conta de Água",
+      description: "Água e esgoto - Copasa",
+      frequency: "MONTHLY",
+      dayOfMonth: 13,
+      expectedAmount: 85.00,
+      minAmount: 60.00,
+      maxAmount: 120.00,
+      matchPattern: "copasa",
+      nextDueDate: new Date("2025-02-13"),
+      lastPaidDate: new Date("2025-01-13"),
+      lastPaidAmount: 85.00,
+      isActive: true,
+    },
+  });
+
+  console.log(`   ✅ ${subNetflix.title}`);
+  console.log(`   ✅ ${subSpotify.title}`);
+  console.log(`   ✅ ${subAmazonPrime.title}`);
+  console.log(`   ✅ ${subAluguel.title}`);
+  console.log(`   ✅ ${subEnergia.title}`);
+  console.log(`   ✅ ${subAgua.title}`);
+
+  // ===== 15. CRIAR SUBSCRIPTIONS - CONTA PJ =====
+  console.log("\n🔔 Criando subscriptions da conta PJ...");
+
+  const subAWS = await prisma.subscription.create({
+    data: {
+      walletId: walletC6Empresarial.id,
+      title: "AWS Cloud",
+      description: "Hospedagem e infraestrutura",
+      frequency: "MONTHLY",
+      dayOfMonth: 10,
+      expectedAmount: 450.00,
+      minAmount: 300.00,
+      maxAmount: 600.00,
+      matchPattern: "aws",
+      nextDueDate: new Date("2025-02-10"),
+      lastPaidDate: new Date("2025-01-10"),
+      lastPaidAmount: 450.00,
+      isActive: true,
+    },
+  });
+
+  const subVercel = await prisma.subscription.create({
+    data: {
+      walletId: walletC6Empresarial.id,
+      title: "Vercel Pro",
+      description: "Plano Pro de hospedagem",
+      frequency: "MONTHLY",
+      dayOfMonth: 12,
+      expectedAmount: 120.00,
+      minAmount: 100.00,
+      maxAmount: 150.00,
+      matchPattern: "vercel",
+      nextDueDate: new Date("2025-02-12"),
+      lastPaidDate: new Date("2025-01-12"),
+      lastPaidAmount: 120.00,
+      isActive: true,
+    },
+  });
+
+  const subGoogleCloud = await prisma.subscription.create({
+    data: {
+      walletId: walletC6Empresarial.id,
+      title: "Google Cloud Platform",
+      description: "Serviços GCP",
+      frequency: "MONTHLY",
+      dayOfMonth: 15,
+      expectedAmount: 280.00,
+      minAmount: 200.00,
+      maxAmount: 400.00,
+      matchPattern: "google cloud",
+      nextDueDate: new Date("2025-02-15"),
+      lastPaidDate: new Date("2025-01-15"),
+      lastPaidAmount: 280.00,
+      isActive: true,
+    },
+  });
+
+  const subCanva = await prisma.subscription.create({
+    data: {
+      walletId: walletC6Empresarial.id,
+      title: "Canva Pro",
+      description: "Plano Pro para design",
+      frequency: "MONTHLY",
+      dayOfMonth: 8,
+      expectedAmount: 54.90,
+      minAmount: 50.00,
+      maxAmount: 60.00,
+      matchPattern: "canva",
+      nextDueDate: new Date("2025-02-08"),
+      lastPaidDate: new Date("2025-01-08"),
+      lastPaidAmount: 54.90,
+      isActive: true,
+    },
+  });
+
+  const subAdobe = await prisma.subscription.create({
+    data: {
+      walletId: walletC6Empresarial.id,
+      title: "Adobe Creative Cloud",
+      description: "Suite completa Adobe",
+      frequency: "MONTHLY",
+      dayOfMonth: 9,
+      expectedAmount: 239.90,
+      minAmount: 230.00,
+      maxAmount: 250.00,
+      matchPattern: "adobe",
+      nextDueDate: new Date("2025-02-09"),
+      lastPaidDate: new Date("2025-01-09"),
+      lastPaidAmount: 239.90,
+      isActive: true,
+    },
+  });
+
+  const subInternet = await prisma.subscription.create({
+    data: {
+      walletId: walletInterPJ.id,
+      title: "Internet Fibra",
+      description: "Internet empresarial 500MB",
+      frequency: "MONTHLY",
+      dayOfMonth: 5,
+      expectedAmount: 299.90,
+      minAmount: 299.90,
+      maxAmount: 299.90,
+      matchPattern: "internet fibra",
+      nextDueDate: new Date("2025-02-05"),
+      lastPaidDate: new Date("2025-01-05"),
+      lastPaidAmount: 299.90,
+      isActive: true,
+    },
+  });
+
+  console.log(`   ✅ ${subAWS.title}`);
+  console.log(`   ✅ ${subVercel.title}`);
+  console.log(`   ✅ ${subGoogleCloud.title}`);
+  console.log(`   ✅ ${subCanva.title}`);
+  console.log(`   ✅ ${subAdobe.title}`);
+  console.log(`   ✅ ${subInternet.title}`);
+
+  // ===== 16. VINCULAR TRANSAÇÕES EXISTENTES ÀS SUBSCRIPTIONS =====
+  console.log("\n🔗 Vinculando transações às subscriptions...");
+
+  // Vincular transações PF
+  await prisma.transaction.updateMany({
+    where: { description: { contains: "Netflix", mode: "insensitive" } },
+    data: { subscriptionId: subNetflix.id },
+  });
+
+  await prisma.transaction.updateMany({
+    where: { description: { contains: "Spotify", mode: "insensitive" } },
+    data: { subscriptionId: subSpotify.id },
+  });
+
+  await prisma.transaction.updateMany({
+    where: { description: { contains: "Amazon Prime", mode: "insensitive" } },
+    data: { subscriptionId: subAmazonPrime.id },
+  });
+
+  await prisma.transaction.updateMany({
+    where: { description: { contains: "Aluguel", mode: "insensitive" } },
+    data: { subscriptionId: subAluguel.id },
+  });
+
+  await prisma.transaction.updateMany({
+    where: { description: { contains: "Cemig", mode: "insensitive" } },
+    data: { subscriptionId: subEnergia.id },
+  });
+
+  await prisma.transaction.updateMany({
+    where: { description: { contains: "Copasa", mode: "insensitive" } },
+    data: { subscriptionId: subAgua.id },
+  });
+
+  // Vincular transações PJ
+  await prisma.transaction.updateMany({
+    where: { description: { contains: "AWS", mode: "insensitive" } },
+    data: { subscriptionId: subAWS.id },
+  });
+
+  await prisma.transaction.updateMany({
+    where: { description: { contains: "Vercel", mode: "insensitive" } },
+    data: { subscriptionId: subVercel.id },
+  });
+
+  await prisma.transaction.updateMany({
+    where: { description: { contains: "Google Cloud", mode: "insensitive" } },
+    data: { subscriptionId: subGoogleCloud.id },
+  });
+
+  await prisma.transaction.updateMany({
+    where: { description: { contains: "Canva", mode: "insensitive" } },
+    data: { subscriptionId: subCanva.id },
+  });
+
+  await prisma.transaction.updateMany({
+    where: { description: { contains: "Adobe", mode: "insensitive" } },
+    data: { subscriptionId: subAdobe.id },
+  });
+
+  await prisma.transaction.updateMany({
+    where: { description: { contains: "Internet Fibra", mode: "insensitive" } },
+    data: { subscriptionId: subInternet.id },
+  });
+
+  console.log("   ✅ Transações vinculadas às subscriptions");
+
   // ===== RESUMO FINAL =====
   console.log("\n" + "=".repeat(50));
   console.log("✅ SEED CONCLUÍDO COM SUCESSO!");
@@ -500,6 +804,9 @@ async function main() {
   console.log(`\n   💸 Transações:`);
   console.log(`      • ${transactionsPF.length + 1} transações (PF)`);
   console.log(`      • ${transactionsPJ.length + 2} transações (PJ)`);
+  console.log(`\n   🔔 Subscriptions:`);
+  console.log(`      • 6 subscriptions (PF): Netflix, Spotify, Amazon Prime, Aluguel, Luz, Água`);
+  console.log(`      • 6 subscriptions (PJ): AWS, Vercel, GCP, Canva, Adobe, Internet`);
   console.log(`\n   🏷️  Categorias: ${categoriesIncome.length + categoriesExpense.length}`);
   console.log(`   💰 Moedas: 1 (${brl.code})`);
   console.log(`   🔔 Lembretes: 3`);
